@@ -67,7 +67,6 @@ namespace memscan
 
             Console.WriteLine("Proceeding to dump..");
 
-            // I don't know why but I had to reverse this
             while (proc_max_address_l>=proc_min_address_l)
             {
                 // 28 = sizeof(MEMORY_BASIC_INFORMATION)
