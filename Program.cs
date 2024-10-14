@@ -34,14 +34,14 @@ namespace memscan
 
             Console.WriteLine("Architecture: {0}", sys_info.processorArchitecture.ToString());
 
-            IntPtr proc_min_address = sys_info.minimumApplicationAddress;
-            IntPtr proc_max_address = sys_info.maximumApplicationAddress;
+            UIntPtr proc_min_address = sys_info.minimumApplicationAddress;
+            UIntPtr proc_max_address = sys_info.maximumApplicationAddress;
 
             // saving the values as long ints so I won't have to do a lot of casts later
-            long proc_min_address_l = (long)proc_min_address;
-            long proc_max_address_l = (long)proc_max_address;
+            ulong proc_min_address_l = (ulong)proc_min_address;
+            ulong proc_max_address_l = (ulong)proc_max_address;
 
-            Console.WriteLine("Min: {0}, Max: {1}", proc_min_address.ToString("x8"), proc_max_address.ToString("x8"));
+            //Console.WriteLine("Min: {0}, Max: {1}", proc_min_address.ToString("x8"), proc_max_address.ToString("x8"));
 
             // notepad better be runnin'
             Process process = Process.GetProcessesByName(process_to_scan).FirstOrDefault();
@@ -68,7 +68,7 @@ namespace memscan
             Console.WriteLine("Proceeding to dump..");
 
             // I don't know why but I had to reverse this
-            while (proc_min_address_l >= proc_max_address_l)
+            while (proc_max_address_l>=proc_min_address_l)
             {
                 // 28 = sizeof(MEMORY_BASIC_INFORMATION)
                 int ret = VirtualQueryEx(processHandle, proc_min_address, out mem_basic_info, 28);
@@ -135,8 +135,8 @@ namespace memscan
                 }
 
                 // move to the next memory chunk
-                proc_min_address_l += mem_basic_info.RegionSize;
-                proc_min_address = new IntPtr(proc_min_address_l);
+                proc_min_address_l += (ulong)mem_basic_info.RegionSize;
+                proc_min_address = new UIntPtr(proc_min_address_l);
             }
             Console.WriteLine("Completed");
 
@@ -173,7 +173,7 @@ namespace memscan
 
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern int VirtualQueryEx(IntPtr hProcess,
-        IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, uint dwLength);
+        UIntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, uint dwLength);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
@@ -202,8 +202,8 @@ namespace memscan
             public ARCHITECTURE processorArchitecture;
             ushort reserved;
             public uint pageSize;
-            public IntPtr minimumApplicationAddress;
-            public IntPtr maximumApplicationAddress;
+            public UIntPtr minimumApplicationAddress;
+            public UIntPtr maximumApplicationAddress;
             public IntPtr activeProcessorMask;
             public uint numberOfProcessors;
             public uint processorType;
